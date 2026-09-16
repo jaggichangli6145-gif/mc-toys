@@ -641,6 +641,173 @@
     </div>
   </div>
 
+  <!-- Checkout & Phone Verification Modal -->
+  <div class="modal-overlay" id="checkout-flow-modal">
+    <div class="modal-content checkout-modal-content" style="max-width: 560px; padding: 28px 28px 24px;">
+      <button class="modal-close-btn" onclick="closeCheckoutModal()"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="checkout-header" style="margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: #FFE8EF; color: #FF477E; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.25rem; margin: 0; color: #1E293B;">Express Checkout</h3>
+            <span style="font-size: 0.8rem; color: #64748B;">Secure 2-Step Indian Mobile Verification</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Development Mode Warning/Notice Banner -->
+      <div id="otp-dev-banner" class="otp-dev-banner" style="display: none;">
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+          <i class="fa-solid fa-vial-circle-check" style="font-size: 1.2rem; color: #D97706; margin-top: 2px;"></i>
+          <div style="flex-grow: 1;">
+            <div style="font-weight: 700; font-size: 0.85rem; color: #92400E;">DEVELOPMENT TEST MODE ACTIVE</div>
+            <div style="font-size: 0.78rem; color: #B45309; margin-top: 2px;">
+              Real SMS gateway is simulated. Generated test OTP: <strong id="dev-otp-display" style="font-size: 0.95rem; letter-spacing: 2px; color: #78350F; background: #FEF3C7; padding: 2px 6px; border-radius: 4px;">-</strong>
+              <button type="button" onclick="autoFillDevOtp()" class="btn-copy-otp" title="Autofill OTP">Fill OTP</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary Card in Modal -->
+      <div class="checkout-order-summary-box" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+          <span style="color: #475569; font-weight: 600;">Items in Cart: <strong id="checkout-cart-count" style="color: #0F172A;">0</strong></span>
+          <span style="color: #475569; font-weight: 600;">Payable Total: <strong id="checkout-cart-total" style="color: #FF477E; font-size: 1.1rem;">₹0</strong></span>
+        </div>
+      </div>
+
+      <!-- Checkout Form -->
+      <form id="checkout-form" onsubmit="handleCheckoutSubmit(event)">
+        <!-- Customer Details -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; color: #334155;">Customer Name *</label>
+            <input type="text" id="cust-name" required placeholder="e.g. Rahul Sharma"
+                   style="width: 100%; padding: 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.88rem; outline: none;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; color: #334155;">Delivery PIN Code *</label>
+            <input type="text" id="cust-pincode" required maxlength="6" pattern="[0-9]{6}" placeholder="e.g. 110001"
+                   style="width: 100%; padding: 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.88rem; outline: none;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; color: #334155;">Delivery Address *</label>
+          <input type="text" id="cust-address" required placeholder="Flat / House No., Street, Landmark"
+                 style="width: 100%; padding: 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.88rem; outline: none;" />
+        </div>
+
+        <!-- ================= PHONE NUMBER OTP VERIFICATION BOX ================= -->
+        <div class="phone-verification-card" style="border: 1.5px solid #CBD5E1; border-radius: 14px; padding: 16px; background: #FFFFFF; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #0F172A;">
+              <i class="fa-solid fa-mobile-screen-button" style="color: #FF477E; margin-right: 4px;"></i> Mobile Number Verification *
+            </label>
+            <span id="phone-verified-status-badge" class="verification-badge pending">
+              <i class="fa-solid fa-circle-xmark"></i> Unverified
+            </span>
+          </div>
+
+          <!-- Step A: Mobile Input with +91 Prefix -->
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <div class="phone-prefix-box" style="display: flex; align-items: center; gap: 6px; padding: 0 12px; background: #F1F5F9; border: 1.5px solid #CBD5E1; border-radius: 10px; font-weight: 700; color: #334155; font-size: 0.9rem; user-select: none;">
+              <span style="font-size: 1.1rem;">🇮🇳</span>
+              <span>+91</span>
+            </div>
+            <input 
+              type="tel" 
+              id="cust-phone" 
+              maxlength="10" 
+              placeholder="10-digit mobile number" 
+              oninput="handlePhoneInput(this)"
+              style="flex-grow: 1; padding: 10px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.5px; outline: none;"
+            />
+            <button 
+              type="button" 
+              id="btn-send-otp" 
+              class="btn btn-primary" 
+              onclick="triggerSendOtp()"
+              style="padding: 10px 16px; font-size: 0.85rem; white-space: nowrap; border-radius: 10px;">
+              <i class="fa-solid fa-paper-plane"></i> Send OTP
+            </button>
+          </div>
+
+          <!-- Phone Input Helper / Validation Message -->
+          <div id="phone-input-msg" style="font-size: 0.78rem; color: #64748B; margin-bottom: 6px;">
+            Please enter your 10-digit mobile number to receive verification code.
+          </div>
+
+          <!-- Step B: OTP Input & Verification Section (Hidden until OTP is sent) -->
+          <div id="otp-verification-section" style="display: none; border-top: 1px dashed #E2E8F0; padding-top: 12px; margin-top: 10px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; color: #334155;">
+              Enter 6-Digit OTP Code
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input 
+                type="text" 
+                id="otp-input-field" 
+                maxlength="6" 
+                placeholder="• • • • • •" 
+                style="flex-grow: 1; padding: 10px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 1.1rem; letter-spacing: 4px; font-weight: 700; text-align: center; outline: none; font-family: monospace;"
+              />
+              <button 
+                type="button" 
+                id="btn-verify-otp" 
+                class="btn btn-primary" 
+                onclick="triggerVerifyOtp()"
+                style="padding: 10px 18px; font-size: 0.85rem; border-radius: 10px; background: #059669; border-color: #059669;">
+                <i class="fa-solid fa-circle-check"></i> Verify OTP
+              </button>
+            </div>
+
+            <!-- OTP Timer / Resend Row -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.78rem;">
+              <span id="otp-timer-text" style="color: #64748B;">OTP valid for: <strong id="otp-countdown" style="color: #0F172A;">05:00</strong></span>
+              <button 
+                type="button" 
+                id="btn-resend-otp" 
+                class="btn-text-link" 
+                onclick="triggerSendOtp()" 
+                disabled 
+                style="border: none; background: none; color: #94A3B8; font-weight: 700; cursor: not-allowed; text-decoration: underline;">
+                Resend OTP in <span id="cooldown-counter">60</span>s
+              </button>
+            </div>
+
+            <!-- Verification Feedback Alert -->
+            <div id="otp-feedback-box" style="display: none; margin-top: 8px; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;"></div>
+          </div>
+
+          <!-- Step C: Success Confirmation Card (Shown when verified) -->
+          <div id="phone-success-box" class="phone-success-box" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-circle-check" style="font-size: 1.25rem; color: #059669;"></i>
+              <div>
+                <div style="font-weight: 700; color: #065F46; font-size: 0.9rem;">Phone number verified successfully.</div>
+                <div style="font-size: 0.76rem; color: #047857;">Verified on <span id="verified-phone-number-display">+91</span> • You can now place your order securely.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Order Button -->
+        <button 
+          type="submit" 
+          id="btn-complete-order" 
+          class="btn-checkout" 
+          disabled 
+          style="width: 100%; opacity: 0.6; cursor: not-allowed;">
+          <i class="fa-solid fa-lock"></i> Place Order (Phone Verification Required)
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Checkout Celebration Modal -->
   <div class="modal-overlay" id="checkout-success-modal">
     <div class="modal-content" style="max-width: 520px; text-align: center; padding: 40px 30px;">
@@ -712,8 +879,18 @@
         </div>
       </div>
 
-      <!-- Admin Product Management Table Area -->
-      <div style="padding: 24px 30px; overflow-y: auto; flex-grow: 1;">
+      <!-- Admin Navigation Tabs -->
+      <div style="padding: 0 30px; border-bottom: 1.5px solid #EEF2F6; display: flex; gap: 24px; background: #FAFBFD;">
+        <button id="admin-tab-inventory" class="admin-tab-btn active" onclick="switchAdminTab('inventory')">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventory & Pricing
+        </button>
+        <button id="admin-tab-sms" class="admin-tab-btn" onclick="switchAdminTab('sms')">
+          <i class="fa-solid fa-comment-sms"></i> SMS / OTP Settings
+        </button>
+      </div>
+
+      <!-- Admin Tab 1: Product Management Table Area -->
+      <div id="admin-view-inventory" style="padding: 24px 30px; overflow-y: auto; flex-grow: 1;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <h4 style="font-size: 1.15rem;">Manage Inventory & Pricing (<span id="admin-total-products">0</span> Toys)</h4>
           <input type="text" id="admin-filter-search" placeholder="Search catalog toys..." oninput="renderAdminProductTable()"
@@ -736,6 +913,113 @@
               <!-- Rendered via JS -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Admin Tab 2: SMS & OTP Settings Area -->
+      <div id="admin-view-sms" style="display: none; padding: 24px 30px; overflow-y: auto; flex-grow: 1;">
+        <div style="margin-bottom: 20px;">
+          <h4 style="font-size: 1.2rem; color: #1E293B; margin-bottom: 4px;">SMS / OTP Gateway Configuration</h4>
+          <p style="color: #64748B; font-size: 0.88rem;">Monitor Indian mobile (+91) OTP verification, MSG91 integration architecture, and rate limit protections.</p>
+        </div>
+
+        <!-- Mode Indicator Banner -->
+        <div id="admin-sms-mode-banner" style="background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 42px; height: 42px; border-radius: 10px; background: #FDE68A; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i class="fa-solid fa-flask-vial"></i>
+            </div>
+            <div>
+              <div style="font-weight: 800; font-size: 1rem; color: #92400E;" id="admin-sms-banner-title">Active Provider: Development Mode</div>
+              <div style="font-size: 0.84rem; color: #B45309;" id="admin-sms-banner-desc">Real SMS costs are disabled. OTPs are simulated safely in terminal and UI.</div>
+            </div>
+          </div>
+          <span class="badge" style="background: #F59E0B; color: white; padding: 6px 14px; font-size: 0.82rem; font-weight: 700;" id="admin-sms-mode-pill">TEST MODE</span>
+        </div>
+
+        <!-- 4-Grid Status Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          
+          <div class="admin-stat-box" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #64748B; text-transform: uppercase;">SMS Service Status</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #059669; margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-circle" style="font-size: 0.7rem;"></i> <span id="admin-sms-stat-status">Operational</span>
+            </div>
+            <div style="font-size: 0.75rem; color: #64748B; margin-top: 4px;">Endpoints responding</div>
+          </div>
+
+          <div class="admin-stat-box" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #64748B; text-transform: uppercase;">OTP Provider</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #1E293B; margin-top: 6px;" id="admin-sms-stat-provider">development</div>
+            <div style="font-size: 0.75rem; color: #64748B; margin-top: 4px;">Configured in server .env</div>
+          </div>
+
+          <div class="admin-stat-box" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #64748B; text-transform: uppercase;">MSG91 Template Status</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #3B82F6; margin-top: 6px;" id="admin-sms-stat-template">Ready / Preconfigured</div>
+            <div style="font-size: 0.75rem; color: #64748B; margin-top: 4px;">Template ID mapping ready</div>
+          </div>
+
+          <div class="admin-stat-box" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Rate Limiting & Security</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #10B981; margin-top: 6px;">Active</div>
+            <div style="font-size: 0.75rem; color: #64748B; margin-top: 4px;">60s cooldown • 3 max attempts</div>
+          </div>
+
+        </div>
+
+        <!-- Detailed Configuration Specs Table -->
+        <div style="background: white; border: 1.5px solid #EEF2F6; border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
+          <div style="padding: 16px 20px; background: #F8FAFC; border-bottom: 1px solid #EEF2F6; font-weight: 700; font-size: 0.95rem; color: #334155; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-sliders" style="color: #FF477E; margin-right: 6px;"></i> Technical Parameters</span>
+            <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.78rem;" onclick="fetchAdminSmsConfig()">
+              <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <tbody>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 12px 20px; font-weight: 600; color: #475569; width: 35%;">Country Routing</td>
+                <td style="padding: 12px 20px; font-weight: 700; color: #0F172A;" id="admin-sms-country">+91 (India)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 12px 20px; font-weight: 600; color: #475569;">Environment Setting</td>
+                <td style="padding: 12px 20px;"><code style="background: #F1F5F9; padding: 3px 8px; border-radius: 6px; color: #D97706; font-weight: 700;" id="admin-sms-env-var">SMS_PROVIDER=development</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 12px 20px; font-weight: 600; color: #475569;">MSG91 Sender ID</td>
+                <td style="padding: 12px 20px; font-weight: 700; color: #0F172A;" id="admin-sms-sender-id">TOYLAND</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 12px 20px; font-weight: 600; color: #475569;">MSG91 Auth Key Status</td>
+                <td style="padding: 12px 20px; color: #64748B;">
+                  <span id="admin-sms-auth-status" style="font-weight: 700;">Protected on server</span> 
+                  <span style="font-size: 0.78rem; color: #94A3B8;">(Secret key is never sent to frontend)</span>
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 12px 20px; font-weight: 600; color: #475569;">OTP Expiration Window</td>
+                <td style="padding: 12px 20px; font-weight: 700; color: #0F172A;" id="admin-sms-expiry">300 seconds (5 Minutes)</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 20px; font-weight: 600; color: #475569;">Resend Request Cooldown</td>
+                <td style="padding: 12px 20px; font-weight: 700; color: #0F172A;" id="admin-sms-cooldown">60 seconds</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Production Switch Instructions Box -->
+        <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 14px; padding: 18px 20px;">
+          <h5 style="color: #1E40AF; font-size: 0.95rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-rocket"></i> How to enable MSG91 Production SMS:
+          </h5>
+          <ol style="margin-left: 20px; color: #1E3A8A; font-size: 0.85rem; line-height: 1.6;">
+            <li>Open the <code>.env</code> file in your TOYLAND server directory.</li>
+            <li>Set <code>SMS_PROVIDER=production</code></li>
+            <li>Add your <code>MSG91_AUTH_KEY=your_msg91_key_here</code> and <code>MSG91_TEMPLATE_ID=your_template_id</code></li>
+            <li>Restart the server. All OTPs will instantly deliver via MSG91 SMS gateway.</li>
+          </ol>
         </div>
       </div>
     </div>

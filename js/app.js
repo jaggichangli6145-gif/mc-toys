@@ -550,38 +550,8 @@ function renderSearchResults(query) {
   `).join('');
 }
 
-// ----------------- CHECKOUT WITH CONFETTI -----------------
-function triggerCheckout() {
-  if (state.cart.length === 0) {
-    showToast('Your cart is empty!', 'info', 'fa-info');
-    return;
-  }
-
-  toggleCartDrawer(false);
-  launchConfetti();
-
-  const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const checkoutModal = document.getElementById('checkout-success-modal');
-  const summaryEl = document.getElementById('checkout-success-summary');
-  if (summaryEl) {
-    summaryEl.innerHTML = `
-      <p style="font-size: 1.1rem; color: #334155; margin-bottom: 12px;">
-        Order Total: <strong style="color: #FF477E;">₹${total.toLocaleString('en-IN')}</strong>
-      </p>
-      <p style="color: #64748B; font-size: 0.9rem;">
-        We are preparing your package with extra smiles! Free shipping is included. You will receive an SMS and WhatsApp tracking update shortly.
-      </p>
-    `;
-  }
-
-  if (checkoutModal) checkoutModal.classList.add('active');
-
-  // Clear cart after checkout
-  state.cart = [];
-  saveState();
-  updateHeaderCounts();
-  renderCartDrawer();
-}
+// ----------------- CHECKOUT ROUTER -----------------
+// (Delegates to OTP Verification Checkout flow modal implemented below)
 
 function closeCheckoutSuccess() {
   const modal = document.getElementById('checkout-success-modal');
@@ -1003,3 +973,546 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// =============================================================================
+// PHONE NUMBER OTP VERIFICATION & CHECKOUT SYSTEM (DEVELOPMENT & MSG91 READY)
+// =============================================================================
+
+let otpState = {
+  mobile: '',
+  isVerified: false,
+  verifiedToken: null,
+  cooldownTimer: null,
+  expiryTimer: null,
+  cooldownRemaining: 0,
+  expiryRemaining: 0,
+  isSending: false,
+  isVerifying: false,
+  devOtp: null
+};
+
+// Validate Indian mobile numbers (+91, starts with 6,7,8,9, 10 digits)
+function validateIndianMobile(phone) {
+  if (!phone) return { valid: false, error: 'Mobile number is required.' };
+  const cleaned = phone.replace(/[\s\-\(\)\+]/g, '');
+  // Extract 10 digits
+  let digits = cleaned;
+  if (cleaned.startsWith('91') && cleaned.length === 12) {
+    digits = cleaned.slice(2);
+  } else if (cleaned.startsWith('0') && cleaned.length === 11) {
+    digits = cleaned.slice(1);
+  }
+
+  if (!/^[6-9]\d{9}$/.test(digits)) {
+    return {
+      valid: false,
+      error: 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.'
+    };
+  }
+  return { valid: true, mobile: digits };
+}
+
+function handlePhoneInput(input) {
+  // Allow only digits
+  input.value = input.value.replace(/\D/g, '').slice(0, 10);
+  const msgEl = document.getElementById('phone-input-msg');
+  const btnSend = document.getElementById('btn-send-otp');
+
+  // If phone changes after verification, reset verified status
+  if (otpState.isVerified && input.value !== otpState.mobile) {
+    resetVerificationState();
+  }
+
+  if (input.value.length === 10) {
+    const val = validateIndianMobile(input.value);
+    if (val.valid) {
+      if (msgEl) {
+        msgEl.textContent = 'Valid 10-digit Indian number (+91). Ready to send OTP.';
+        msgEl.style.color = '#059669';
+      }
+      if (btnSend && otpState.cooldownRemaining <= 0) {
+        btnSend.disabled = false;
+      }
+      return;
+    }
+  }
+
+  if (msgEl) {
+    msgEl.textContent = 'Please enter your 10-digit mobile number to receive verification code.';
+    msgEl.style.color = '#64748B';
+  }
+}
+
+function resetVerificationState() {
+  otpState.isVerified = false;
+  otpState.verifiedToken = null;
+  otpState.devOtp = null;
+
+  const badge = document.getElementById('phone-verified-status-badge');
+  if (badge) {
+    badge.className = 'verification-badge pending';
+    badge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Unverified';
+  }
+
+  const successBox = document.getElementById('phone-success-box');
+  if (successBox) successBox.style.display = 'none';
+
+  const orderBtn = document.getElementById('btn-complete-order');
+  if (orderBtn) {
+    orderBtn.disabled = true;
+    orderBtn.style.opacity = '0.6';
+    orderBtn.style.cursor = 'not-allowed';
+    orderBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Place Order (Phone Verification Required)';
+  }
+}
+
+async function triggerSendOtp() {
+  const phoneInput = document.getElementById('cust-phone');
+  const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+  const validation = validateIndianMobile(rawPhone);
+
+  const feedback = document.getElementById('otp-feedback-box');
+  const msgEl = document.getElementById('phone-input-msg');
+
+  if (!validation.valid) {
+    if (msgEl) {
+      msgEl.textContent = validation.error;
+      msgEl.style.color = '#EF4444';
+    }
+    showToast(validation.error, 'error', 'fa-triangle-exclamation');
+    if (phoneInput) phoneInput.focus();
+    return;
+  }
+
+  if (otpState.cooldownRemaining > 0) {
+    showToast(`Please wait ${otpState.cooldownRemaining}s before requesting a new OTP.`, 'info', 'fa-clock');
+    return;
+  }
+
+  const btnSend = document.getElementById('btn-send-otp');
+  const btnResend = document.getElementById('btn-resend-otp');
+  if (btnSend) {
+    btnSend.disabled = true;
+    btnSend.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+  }
+
+  try {
+    const response = await fetch('/api/otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: validation.mobile })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to send OTP.');
+    }
+
+    otpState.mobile = validation.mobile;
+    otpState.devOtp = data.devOtp || null;
+
+    // Show OTP input section
+    const otpSection = document.getElementById('otp-verification-section');
+    if (otpSection) otpSection.style.display = 'block';
+
+    const otpField = document.getElementById('otp-input-field');
+    if (otpField) {
+      otpField.value = '';
+      otpField.focus();
+    }
+
+    // Handle Development Mode Simulation Banner
+    const devBanner = document.getElementById('otp-dev-banner');
+    const devOtpDisplay = document.getElementById('dev-otp-display');
+    if (data.isDevelopment && data.devOtp) {
+      if (devBanner) devBanner.style.display = 'block';
+      if (devOtpDisplay) devOtpDisplay.textContent = data.devOtp;
+      showToast(`[Dev Mode] Simulated OTP: ${data.devOtp}`, 'info', 'fa-vial');
+    } else {
+      if (devBanner) devBanner.style.display = 'none';
+      showToast(`OTP sent successfully to +91 ${validation.mobile}`, 'success', 'fa-paper-plane');
+    }
+
+    if (feedback) {
+      feedback.className = 'otp-feedback-info';
+      feedback.style.display = 'block';
+      feedback.textContent = `Verification code sent to +91 ${validation.mobile}. Please enter it below.`;
+    }
+
+    // Start Cooldown Timer (60s)
+    startCooldown(data.cooldownSeconds || 60);
+
+    // Start Expiry Timer (300s)
+    startExpiryCountdown(data.expiresInSeconds || 300);
+
+  } catch (err) {
+    showToast(err.message, 'error', 'fa-triangle-exclamation');
+    if (feedback) {
+      feedback.className = 'otp-feedback-error';
+      feedback.style.display = 'block';
+      feedback.textContent = err.message;
+    }
+  } finally {
+    if (btnSend) {
+      btnSend.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send OTP';
+    }
+  }
+}
+
+function autoFillDevOtp() {
+  if (otpState.devOtp) {
+    const input = document.getElementById('otp-input-field');
+    if (input) {
+      input.value = otpState.devOtp;
+      input.focus();
+    }
+  }
+}
+
+function startCooldown(seconds) {
+  clearInterval(otpState.cooldownTimer);
+  otpState.cooldownRemaining = seconds;
+
+  const btnSend = document.getElementById('btn-send-otp');
+  const btnResend = document.getElementById('btn-resend-otp');
+  const counterEl = document.getElementById('cooldown-counter');
+
+  if (btnSend) btnSend.disabled = true;
+  if (btnResend) btnResend.disabled = true;
+
+  otpState.cooldownTimer = setInterval(() => {
+    otpState.cooldownRemaining -= 1;
+    if (counterEl) counterEl.textContent = otpState.cooldownRemaining;
+
+    if (otpState.cooldownRemaining <= 0) {
+      clearInterval(otpState.cooldownTimer);
+      if (btnSend) btnSend.disabled = false;
+      if (btnResend) {
+        btnResend.disabled = false;
+        btnResend.style.color = '#FF477E';
+        btnResend.style.cursor = 'pointer';
+        btnResend.textContent = 'Resend OTP Now';
+      }
+    } else {
+      if (btnResend) {
+        btnResend.disabled = true;
+        btnResend.style.color = '#94A3B8';
+        btnResend.style.cursor = 'not-allowed';
+        btnResend.innerHTML = `Resend OTP in <span id="cooldown-counter">${otpState.cooldownRemaining}</span>s`;
+      }
+    }
+  }, 1000);
+}
+
+function startExpiryCountdown(seconds) {
+  clearInterval(otpState.expiryTimer);
+  otpState.expiryRemaining = seconds;
+  const countdownEl = document.getElementById('otp-countdown');
+
+  otpState.expiryTimer = setInterval(() => {
+    otpState.expiryRemaining -= 1;
+    if (countdownEl) {
+      const mins = String(Math.floor(otpState.expiryRemaining / 60)).padStart(2, '0');
+      const secs = String(otpState.expiryRemaining % 60).padStart(2, '0');
+      countdownEl.textContent = `${mins}:${secs}`;
+    }
+
+    if (otpState.expiryRemaining <= 0) {
+      clearInterval(otpState.expiryTimer);
+      const feedback = document.getElementById('otp-feedback-box');
+      if (feedback && !otpState.isVerified) {
+        feedback.className = 'otp-feedback-error';
+        feedback.style.display = 'block';
+        feedback.textContent = 'The OTP code has expired. Please click "Resend OTP".';
+      }
+    }
+  }, 1000);
+}
+
+async function triggerVerifyOtp() {
+  const otpInput = document.getElementById('otp-input-field');
+  const otp = otpInput ? otpInput.value.trim() : '';
+  const feedback = document.getElementById('otp-feedback-box');
+
+  if (!otp || otp.length < 4) {
+    if (feedback) {
+      feedback.className = 'otp-feedback-error';
+      feedback.style.display = 'block';
+      feedback.textContent = 'Please enter the full 6-digit OTP code.';
+    }
+    if (otpInput) otpInput.focus();
+    return;
+  }
+
+  const btnVerify = document.getElementById('btn-verify-otp');
+  if (btnVerify) {
+    btnVerify.disabled = true;
+    btnVerify.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+  }
+
+  try {
+    const response = await fetch('/api/otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mobile: otpState.mobile,
+        otp: otp
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Verification failed.');
+    }
+
+    // Verification Success!
+    otpState.isVerified = true;
+    otpState.verifiedToken = data.verifiedToken;
+    clearInterval(otpState.expiryTimer);
+    clearInterval(otpState.cooldownTimer);
+
+    // Update Badges & Confirmation
+    const badge = document.getElementById('phone-verified-status-badge');
+    if (badge) {
+      badge.className = 'verification-badge verified';
+      badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verified';
+    }
+
+    // Hide OTP input section and show success card
+    const otpSection = document.getElementById('otp-verification-section');
+    if (otpSection) otpSection.style.display = 'none';
+
+    const successBox = document.getElementById('phone-success-box');
+    const verifiedPhoneDisplay = document.getElementById('verified-phone-number-display');
+    if (verifiedPhoneDisplay) verifiedPhoneDisplay.textContent = '+91 ' + otpState.mobile;
+    if (successBox) successBox.style.display = 'block';
+
+    // Disable phone editing
+    const phoneInput = document.getElementById('cust-phone');
+    const sendBtn = document.getElementById('btn-send-otp');
+    if (phoneInput) phoneInput.disabled = true;
+    if (sendBtn) sendBtn.style.display = 'none';
+
+    // Unlock Place Order button
+    const orderBtn = document.getElementById('btn-complete-order');
+    if (orderBtn) {
+      orderBtn.disabled = false;
+      orderBtn.style.opacity = '1';
+      orderBtn.style.cursor = 'pointer';
+      orderBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Confirm & Place Order';
+    }
+
+    showToast('Phone number verified successfully.', 'success', 'fa-circle-check');
+
+  } catch (err) {
+    if (feedback) {
+      feedback.className = 'otp-feedback-error';
+      feedback.style.display = 'block';
+      feedback.textContent = err.message;
+    }
+    showToast(err.message, 'error', 'fa-circle-exclamation');
+  } finally {
+    if (btnVerify) {
+      btnVerify.disabled = false;
+      btnVerify.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verify OTP';
+    }
+  }
+}
+
+// ----------------- CHECKOUT FLOW MODAL HANDLERS -----------------
+function triggerCheckout() {
+  if (state.cart.length === 0) {
+    showToast('Your cart is empty! Add toys before checkout.', 'info', 'fa-cart-shopping');
+    return;
+  }
+
+  toggleCartDrawer(false);
+
+  const checkoutModal = document.getElementById('checkout-flow-modal');
+  const cartCountEl = document.getElementById('checkout-cart-count');
+  const cartTotalEl = document.getElementById('checkout-cart-total');
+
+  const totalCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  if (cartCountEl) cartCountEl.textContent = totalCount;
+  if (cartTotalEl) cartTotalEl.textContent = '₹' + totalPrice.toLocaleString('en-IN');
+
+  if (checkoutModal) checkoutModal.classList.add('active');
+}
+
+function closeCheckoutModal() {
+  const modal = document.getElementById('checkout-flow-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function handleCheckoutSubmit(e) {
+  e.preventDefault();
+
+  if (!otpState.isVerified || !otpState.verifiedToken) {
+    showToast('Please verify your Indian mobile number before placing the order.', 'error', 'fa-shield-halved');
+    return;
+  }
+
+  const name = document.getElementById('cust-name').value.trim();
+  const address = document.getElementById('cust-address').value.trim();
+  const pincode = document.getElementById('cust-pincode').value.trim();
+  const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  const orderBtn = document.getElementById('btn-complete-order');
+  if (orderBtn) {
+    orderBtn.disabled = true;
+    orderBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing Order...';
+  }
+
+  try {
+    const res = await fetch('/api/orders/place', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mobile: otpState.mobile,
+        verifiedToken: otpState.verifiedToken,
+        customerName: name,
+        address: `${address}, PIN: ${pincode}`,
+        items: state.cart,
+        total: total
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to place order.');
+    }
+
+    // Order Success!
+    closeCheckoutModal();
+    launchConfetti();
+
+    const checkoutSuccessModal = document.getElementById('checkout-success-modal');
+    const summaryEl = document.getElementById('checkout-success-summary');
+    if (summaryEl) {
+      summaryEl.innerHTML = `
+        <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+          <strong style="color: #065F46; font-size: 1rem;"><i class="fa-solid fa-circle-check"></i> ${data.message}</strong>
+          <div style="color: #047857; font-size: 0.84rem; margin-top: 4px;">Order ID: <strong>#${data.orderId}</strong> • Verified: <strong>${data.verifiedPhone}</strong></div>
+        </div>
+        <p style="font-size: 1.1rem; color: #334155; margin-bottom: 8px;">
+          Order Total: <strong style="color: #FF477E;">₹${total.toLocaleString('en-IN')}</strong>
+        </p>
+        <p style="color: #64748B; font-size: 0.88rem;">
+          Thank you, <strong>${name}</strong>! Your toy package will be dispatched to <em>${address}</em>. An SMS notification has been dispatched to <strong>${data.verifiedPhone}</strong>.
+        </p>
+      `;
+    }
+
+    if (checkoutSuccessModal) checkoutSuccessModal.classList.add('active');
+
+    // Reset cart and OTP state
+    state.cart = [];
+    saveState();
+    updateHeaderCounts();
+    renderCartDrawer();
+
+    resetVerificationState();
+    const phoneInput = document.getElementById('cust-phone');
+    const sendBtn = document.getElementById('btn-send-otp');
+    if (phoneInput) {
+      phoneInput.value = '';
+      phoneInput.disabled = false;
+    }
+    if (sendBtn) sendBtn.style.display = 'inline-block';
+
+  } catch (err) {
+    showToast(err.message, 'error', 'fa-circle-xmark');
+    if (orderBtn) {
+      orderBtn.disabled = false;
+      orderBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Confirm & Place Order';
+    }
+  }
+}
+
+// ----------------- ADMIN DASHBOARD TABS & SMS SETTINGS -----------------
+function switchAdminTab(tab) {
+  const invTab = document.getElementById('admin-tab-inventory');
+  const smsTab = document.getElementById('admin-tab-sms');
+  const invView = document.getElementById('admin-view-inventory');
+  const smsView = document.getElementById('admin-view-sms');
+
+  if (tab === 'sms') {
+    if (invTab) invTab.classList.remove('active');
+    if (smsTab) smsTab.classList.add('active');
+    if (invView) invView.style.display = 'none';
+    if (smsView) smsView.style.display = 'block';
+    fetchAdminSmsConfig();
+  } else {
+    if (smsTab) smsTab.classList.remove('active');
+    if (invTab) invTab.classList.add('active');
+    if (smsView) smsView.style.display = 'none';
+    if (invView) invView.style.display = 'block';
+    renderAdminProductTable();
+  }
+}
+
+async function fetchAdminSmsConfig() {
+  try {
+    const res = await fetch('/api/admin/sms-config');
+    const data = await res.json();
+    if (!res.ok || !data.success) return;
+
+    const cfg = data.config;
+
+    const bannerTitle = document.getElementById('admin-sms-banner-title');
+    const bannerDesc = document.getElementById('admin-sms-banner-desc');
+    const bannerPill = document.getElementById('admin-sms-mode-pill');
+    const bannerBox = document.getElementById('admin-sms-mode-banner');
+
+    if (cfg.isDevelopment) {
+      if (bannerBox) {
+        bannerBox.style.background = '#FEF3C7';
+        bannerBox.style.borderColor = '#F59E0B';
+      }
+      if (bannerTitle) bannerTitle.textContent = 'Active Provider: Development Simulation Mode';
+      if (bannerDesc) bannerDesc.textContent = 'Real SMS costs are disabled. OTPs are simulated safely in terminal logs and API responses.';
+      if (bannerPill) {
+        bannerPill.textContent = 'TEST MODE';
+        bannerPill.style.background = '#F59E0B';
+      }
+    } else {
+      if (bannerBox) {
+        bannerBox.style.background = '#ECFDF5';
+        bannerBox.style.borderColor = '#10B981';
+      }
+      if (bannerTitle) bannerTitle.textContent = 'Active Provider: MSG91 Production SMS Gateway';
+      if (bannerDesc) bannerDesc.textContent = 'Live SMS gateway connected. OTPs are delivered to real Indian mobile handsets.';
+      if (bannerPill) {
+        bannerPill.textContent = 'PRODUCTION';
+        bannerPill.style.background = '#10B981';
+      }
+    }
+
+    const statStatus = document.getElementById('admin-sms-stat-status');
+    const statProvider = document.getElementById('admin-sms-stat-provider');
+    const statTemplate = document.getElementById('admin-sms-stat-template');
+    const countryEl = document.getElementById('admin-sms-country');
+    const envVarEl = document.getElementById('admin-sms-env-var');
+    const senderIdEl = document.getElementById('admin-sms-sender-id');
+    const authStatusEl = document.getElementById('admin-sms-auth-status');
+    const expiryEl = document.getElementById('admin-sms-expiry');
+    const cooldownEl = document.getElementById('admin-sms-cooldown');
+
+    if (statStatus) statStatus.textContent = cfg.gatewayStatus || 'Operational';
+    if (statProvider) statProvider.textContent = cfg.provider;
+    if (statTemplate) statTemplate.textContent = cfg.templateIdConfigured ? `Configured (${cfg.templateIdMasked})` : 'Not Configured (Ready)';
+    if (countryEl) countryEl.textContent = cfg.countryCode || '+91 (India)';
+    if (envVarEl) envVarEl.textContent = `SMS_PROVIDER=${cfg.provider}`;
+    if (senderIdEl) senderIdEl.textContent = cfg.senderId;
+    if (authStatusEl) authStatusEl.textContent = cfg.authKeyConfigured ? `Configured on server (${cfg.authKeyMasked})` : 'Not Configured (Safe Server Memory)';
+    if (expiryEl) expiryEl.textContent = `${cfg.expirySeconds} seconds (${Math.round(cfg.expirySeconds / 60)} Minutes)`;
+    if (cooldownEl) cooldownEl.textContent = `${cfg.cooldownSeconds} seconds`;
+
+  } catch (e) {
+    console.warn('Could not fetch SMS config:', e);
+  }
+}

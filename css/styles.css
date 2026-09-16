@@ -2081,3 +2081,131 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================
+   PHONE OTP VERIFICATION & SMS SETTINGS STYLES
+   ========================================== */
+
+/* Admin Navigation Tabs */
+.admin-tab-btn {
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #64748B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.admin-tab-btn:hover {
+  color: #FF477E;
+}
+
+.admin-tab-btn.active {
+  color: #FF477E;
+  border-bottom-color: #FF477E;
+  background: #FFFFFF;
+}
+
+/* Verification Status Badges */
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.verification-badge.pending {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.verification-badge.verified {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+/* Development Mode Notice Banner */
+.otp-dev-banner {
+  background: #FEF3C7;
+  border: 1.5px dashed #F59E0B;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  animation: pulseLight 3s infinite ease-in-out;
+}
+
+@keyframes pulseLight {
+  0%, 100% { background: #FEF3C7; }
+  50% { background: #FFFBEB; }
+}
+
+.btn-copy-otp {
+  background: #D97706;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-left: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-copy-otp:hover {
+  background: #B45309;
+}
+
+/* Phone Success Box */
+.phone-success-box {
+  background: #ECFDF5;
+  border: 1.5px solid #A7F3D0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* OTP Feedback states */
+.otp-feedback-error {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.otp-feedback-success {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.otp-feedback-info {
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
+}
+
+/* Responsive adjustments for mobile OTP component */
+@media (max-width: 600px) {
+  .checkout-modal-content {
+    padding: 20px 16px !important;
+  }
+  .phone-prefix-box {
+    padding: 0 8px !important;
+    font-size: 0.85rem !important;
+  }
+  #btn-send-otp {
+    padding: 10px 12px !important;
+    font-size: 0.8rem !important;
+  }
+}
