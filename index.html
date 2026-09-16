@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MC TOYS - Where Every Toy Brings a Smile!</title>
+  <meta name="description" content="Discover exciting toys, games, dolls, soft toys, and educational gifts for kids of every age at MC TOYS. Free shipping on orders above ₹999." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧸</text></svg>">
+
+  <!-- Google Fonts: Fredoka & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Top Announcement Promo Bar -->
+  <div class="promo-bar">
+    <span>🎉 Free Shipping on Orders Above ₹999</span>
+    <span class="badge">CODE: TOYJOY100</span>
+  </div>
+
+  <!-- 1. STICKY HEADER / NAVIGATION -->
+  <header class="header-sticky">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="brand-logo" aria-label="MC TOYS Home">
+        <div class="logo-badge">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <div class="logo-text">
+          <span>MC TOYS</span>
+          <span class="logo-sub">Toy Wonderland</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#hero" class="nav-link active">Home</a></li>
+          <li><a href="#best-sellers-section" class="nav-link">Shop</a></li>
+          <li><a href="#categories-section" class="nav-link">Categories</a></li>
+          <li>
+            <a href="#new-arrivals-section" class="nav-link">
+              New Arrivals <span class="hot-badge">NEW</span>
+            </a>
+          </li>
+          <li><a href="#best-sellers-section" class="nav-link">Best Sellers</a></li>
+          <li><a href="#collections-section" class="nav-link">Offers</a></li>
+          <li><a href="#educational-section" class="nav-link">Learn & Play</a></li>
+          <li><a href="#cuddle-section" class="nav-link">Cuddle Corner</a></li>
+          <li><a href="#footer" class="nav-link">About Us</a></li>
+          <li><a href="#footer" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <!-- Search -->
+        <button class="action-btn" onclick="openSearchModal()" title="Search Toys" aria-label="Search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <!-- Wishlist -->
+        <button class="action-btn" onclick="toggleWishlistDrawer(true)" title="My Wishlist" aria-label="Wishlist">
+          <i class="fa-regular fa-heart"></i>
+          <span class="badge-count" id="header-wishlist-count">0</span>
+        </button>
+
+        <!-- Cart -->
+        <button class="action-btn" onclick="toggleCartDrawer(true)" title="Shopping Cart" aria-label="Cart">
+          <i class="fa-solid fa-basket-shopping"></i>
+          <span class="badge-count cart-badge" id="header-cart-count">0</span>
+        </button>
+
+        <!-- Admin Panel Trigger -->
+        <button class="action-btn" onclick="openAdminPanel()" title="Admin Panel" aria-label="Admin">
+          <i class="fa-solid fa-user-shield"></i>
+        </button>
+
+        <!-- Mobile Hamburger -->
+        <button class="action-btn hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main>
+    <!-- 2. HERO SECTION -->
+    <section class="hero-section" id="hero">
+      <div class="container">
+        <div class="hero-grid">
+          
+          <div class="hero-content">
+            <div class="hero-badge-pill">
+              <i class="fa-solid fa-star" style="color: #FFB703;"></i>
+              <span>Where Every Toy Brings a Smile!</span>
+            </div>
+
+            <h1 class="hero-title">
+              Big Fun. Little Prices.<br />
+              <span class="highlight-text">Endless Smiles!</span>
+            </h1>
+
+            <p class="hero-subtitle">
+              Discover exciting toys, games and gifts for every age. From STEM robotics to super cuddly plushies, ignite imagination and joy today!
+            </p>
+
+            <div class="hero-cta-group">
+              <a href="#best-sellers-section" class="btn btn-primary">
+                <i class="fa-solid fa-bag-shopping"></i> Shop Toys
+              </a>
+              <a href="#categories-section" class="btn btn-secondary">
+                <i class="fa-solid fa-layer-group"></i> Explore Categories
+              </a>
+            </div>
+
+            <div class="hero-features">
+              <div class="hero-feat-item">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>100% Child-Safe & Non-Toxic</span>
+              </div>
+              <div class="hero-feat-item">
+                <i class="fa-solid fa-truck-fast"></i>
+                <span>Express 2-Day Delivery</span>
+              </div>
+              <div class="hero-feat-item">
+                <i class="fa-solid fa-arrow-rotate-left"></i>
+                <span>Easy 7-Day Replacement</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual-wrapper">
+            <div class="hero-main-card">
+              <img 
+                src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80" 
+                alt="Happy Child Playing with Toys" 
+                class="hero-main-img" 
+              />
+            </div>
+
+            <!-- Floating Badge 1 -->
+            <div class="floating-card card-1">
+              <div class="float-icon" style="background: #FFE8EC; color: #FF477E;">
+                <i class="fa-solid fa-heart"></i>
+              </div>
+              <div>
+                <div class="float-title">50,000+ Smiles</div>
+                <div class="float-subtitle">Loved by Happy Parents</div>
+              </div>
+            </div>
+
+            <!-- Floating Badge 2 -->
+            <div class="floating-card card-2">
+              <div class="float-icon" style="background: #E8FAEA; color: #06D6A0;">
+                <i class="fa-solid fa-tag"></i>
+              </div>
+              <div>
+                <div class="float-title">Up to 45% Off</div>
+                <div class="float-subtitle">On Best-Seller Toys</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Wave Divider -->
+    <div class="wave-divider">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z" fill="#FFFFFF"></path>
+      </svg>
+    </div>
+
+    <!-- 3. SHOP BY CATEGORY -->
+    <section class="section" id="categories-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge pink">Explore MC Toys</span>
+          <h2 class="section-title">Shop By Category</h2>
+          <p class="section-subtitle">Find the perfect playmate, building set, or creative kit from our 12 cheerful toy categories.</p>
+        </div>
+
+        <div class="categories-grid" id="categories-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. FEATURED COLLECTIONS -->
+    <section class="section section-alt" id="collections-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge blue">Curated For You</span>
+          <h2 class="section-title">Explore Our Collections</h2>
+          <p class="section-subtitle">Handcrafted collections tailored for discovery, family game nights, outdoor thrills, and artistic wonders.</p>
+        </div>
+
+        <div class="collections-grid" id="collections-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. BEST SELLERS -->
+    <section class="section" id="best-sellers-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge yellow">🔥 Trending Now</span>
+          <h2 class="section-title">🔥 Best Sellers</h2>
+          <p class="section-subtitle">The most loved, highly-rated toys flying off our shelves this week.</p>
+        </div>
+
+        <div class="products-grid" id="best-sellers-grid">
+          <!-- Injected via JavaScript (12 items) -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. NEW ARRIVALS -->
+    <section class="section section-alt" id="new-arrivals-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge pink">✨ Fresh Off The Shelf</span>
+          <h2 class="section-title">✨ New Arrivals</h2>
+          <p class="section-subtitle">Check out the newest additions to MC TOYS, featuring the latest interactive tech, soft friends, and action toys.</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs-wrapper">
+          <button class="filter-tab active" data-filter="All">All Toys</button>
+          <button class="filter-tab" data-filter="Boys">Boys</button>
+          <button class="filter-tab" data-filter="Girls">Girls</button>
+          <button class="filter-tab" data-filter="Baby">Baby</button>
+          <button class="filter-tab" data-filter="Educational">Educational</button>
+          <button class="filter-tab" data-filter="Outdoor">Outdoor</button>
+          <button class="filter-tab" data-filter="Games">Games</button>
+        </div>
+
+        <div class="products-grid" id="new-arrivals-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. SHOP BY AGE -->
+    <section class="section" id="age-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge green">Age-Appropriate Play</span>
+          <h2 class="section-title">Find The Perfect Toy By Age</h2>
+          <p class="section-subtitle">Age-guided toy recommendations that align with physical development, cognitive skills, and pure happiness.</p>
+        </div>
+
+        <div class="age-cards-grid" id="age-cards-grid">
+          <!-- Injected via JavaScript (0-2, 3-5, 6-8, 9-12, 13+) -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. EDUCATIONAL TOYS SECTION -->
+    <section class="section edu-section" id="educational-section">
+      <div class="container">
+        <div class="edu-grid">
+          <div>
+            <div class="edu-tag-cloud">
+              <span class="edu-tag"><i class="fa-solid fa-atom"></i> STEM Toys</span>
+              <span class="edu-tag"><i class="fa-solid fa-flask"></i> Science Kits</span>
+              <span class="edu-tag"><i class="fa-solid fa-robot"></i> Robotics</span>
+              <span class="edu-tag"><i class="fa-solid fa-calculator"></i> Math Games</span>
+              <span class="edu-tag"><i class="fa-solid fa-puzzle-piece"></i> Brain Puzzles</span>
+            </div>
+
+            <h2 class="edu-title">Learn. Play. Grow.</h2>
+            <p class="edu-desc">
+              Make learning exciting with toys designed to spark curiosity and creativity. We curate brain-boosting STEM games, electronic experiment kits, and cognitive puzzle sets that prepare young minds for a bright future.
+            </p>
+
+            <div class="edu-features-list">
+              <div class="edu-feat"><i class="fa-solid fa-circle-check"></i> Critical Problem Solving</div>
+              <div class="edu-feat"><i class="fa-solid fa-circle-check"></i> Spatial Reasoning</div>
+              <div class="edu-feat"><i class="fa-solid fa-circle-check"></i> Hands-On Engineering</div>
+              <div class="edu-feat"><i class="fa-solid fa-circle-check"></i> Screen-Free Coding</div>
+            </div>
+
+            <button class="btn btn-primary" onclick="filterBySelectedCategory('educational')">
+              <i class="fa-solid fa-graduation-cap"></i> Explore Educational Toys
+            </button>
+          </div>
+
+          <div>
+            <div class="edu-showcase-box">
+              <img 
+                src="https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=700&q=80" 
+                alt="Educational Robotics Kit" 
+                style="border-radius: 20px; width: 100%; height: 360px; object-fit: cover;"
+              />
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px;">
+                <div>
+                  <h4 style="font-size: 1.2rem; font-weight: 800;">RoboBot Coding STEM Smart Companion</h4>
+                  <span style="color: #64748B; font-size: 0.85rem;">Interactive coding without screens</span>
+                </div>
+                <button class="btn btn-primary" style="padding: 8px 18px; font-size: 0.9rem;" onclick="addToCart(10)">
+                  Add ₹2,199
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. SOFT TOYS SECTION (CUDDLE CORNER) -->
+    <section class="section cuddle-section" id="cuddle-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge pink">Super Huggable</span>
+          <h2 class="section-title">Cuddle Corner 🧸</h2>
+          <p class="section-subtitle">Meet the softest, fluffiest, and sweetest plush buddies made for bedtime snuggles and endless comfort.</p>
+        </div>
+
+        <div class="cuddle-cards-strip">
+          <div class="cuddle-item-card" onclick="filterBySelectedCategory('soft-toys')">
+            <div class="cuddle-icon-bubble">🧸</div>
+            <h4 class="cuddle-item-title">Teddy Bears</h4>
+            <p class="cuddle-item-desc">Giant 3-foot cuddlers to pocket-sized travel bears.</p>
+          </div>
+          <div class="cuddle-item-card" onclick="filterBySelectedCategory('soft-toys')">
+            <div class="cuddle-icon-bubble">🐰</div>
+            <h4 class="cuddle-item-title">Plush Animals</h4>
+            <p class="cuddle-item-desc">Cute bunnies, puppies, kittens, pandas, and lions.</p>
+          </div>
+          <div class="cuddle-item-card" onclick="filterBySelectedCategory('soft-toys')">
+            <div class="cuddle-icon-bubble">🦄</div>
+            <h4 class="cuddle-item-title">Cartoon Plushies</h4>
+            <p class="cuddle-item-desc">Magical unicorns, dragons, and favorite animated heroes.</p>
+          </div>
+          <div class="cuddle-item-card" onclick="filterBySelectedCategory('dolls')">
+            <div class="cuddle-icon-bubble">🪆</div>
+            <h4 class="cuddle-item-title">Cute Dolls</h4>
+            <p class="cuddle-item-desc">Ragdolls, princess figurines, and dress-up friends.</p>
+          </div>
+          <div class="cuddle-item-card" onclick="filterBySelectedCategory('soft-toys')">
+            <div class="cuddle-icon-bubble">☁️</div>
+            <h4 class="cuddle-item-title">Pillow Toys</h4>
+            <p class="cuddle-item-desc">Ultra-squishy memory plush pillows for deep dreamy sleep.</p>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+          <button class="btn btn-primary" onclick="filterBySelectedCategory('soft-toys')">
+            <i class="fa-solid fa-heart"></i> Shop Soft Toys
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. OUTDOOR TOYS SECTION -->
+    <section class="section outdoor-section" id="outdoor-section">
+      <div class="container">
+        
+        <div class="outdoor-highlight-banner">
+          <div>
+            <span class="section-badge" style="background: rgba(255,255,255,0.25); color: white;">Fresh Air & Energy</span>
+            <h2 class="outdoor-banner-title">Get Outside & Play! ☀️</h2>
+            <p class="outdoor-banner-subtitle">
+              Turn your backyard, terrace, or park into an arena of action. High-speed scooters, footballs, water blasters, and sporting sets to keep kids moving!
+            </p>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <button class="btn" style="background: white; color: #0F172A;" onclick="filterBySelectedCategory('outdoor')">
+                <i class="fa-solid fa-bicycle"></i> Shop Outdoor Gear
+              </button>
+              <button class="btn" style="background: rgba(0,0,0,0.2); color: white;" onclick="filterBySelectedCategory('rc-toys')">
+                <i class="fa-solid fa-car-side"></i> RC Adventure
+              </button>
+            </div>
+          </div>
+          <div class="outdoor-img-box">
+            <img 
+              src="https://images.unsplash.com/photo-1535572292327-11f3b04c8f52?auto=format&fit=crop&w=700&q=80" 
+              alt="Kids Outdoor Scooter Fun" 
+              style="width: 100%; height: 320px; object-fit: cover;"
+            />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TRUST BADGES STRIP -->
+    <section class="trust-strip">
+      <div class="container">
+        <div class="trust-grid">
+          <div class="trust-item">
+            <div class="trust-icon-wrap" style="background: #FFE8EC; color: #FF477E;">
+              <i class="fa-solid fa-shield-virus"></i>
+            </div>
+            <div>
+              <div class="trust-item-title">100% Certified Safe</div>
+              <div class="trust-item-desc">BIS certified, non-toxic BPA free materials</div>
+            </div>
+          </div>
+
+          <div class="trust-item">
+            <div class="trust-icon-wrap" style="background: #E8F4FD; color: #4A90E2;">
+              <i class="fa-solid fa-truck-fast"></i>
+            </div>
+            <div>
+              <div class="trust-item-title">Free Express Shipping</div>
+              <div class="trust-item-desc">On all orders above ₹999 across India</div>
+            </div>
+          </div>
+
+          <div class="trust-item">
+            <div class="trust-icon-wrap" style="background: #E8FAEA; color: #06D6A0;">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+            </div>
+            <div>
+              <div class="trust-item-title">Hassle-Free Returns</div>
+              <div class="trust-item-desc">7-day replacement with zero questions asked</div>
+            </div>
+          </div>
+
+          <div class="trust-item">
+            <div class="trust-icon-wrap" style="background: #FEF3D6; color: #FB8500;">
+              <i class="fa-solid fa-gift"></i>
+            </div>
+            <div>
+              <div class="trust-item-title">Gift Wrapping</div>
+              <div class="trust-item-desc">Handcrafted wraps & custom birthday cards</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEWSLETTER CALLOUT -->
+    <section class="section" style="padding: 40px 0 80px;">
+      <div class="container">
+        <div class="newsletter-card">
+          <h2 class="newsletter-title">Join The MC TOYS Club! 🎁</h2>
+          <p class="newsletter-sub">
+            Get <strong>₹200 OFF</strong> on your first order plus secret toy giveaways, birthday coupons, and early access to holiday sales.
+          </p>
+          <form class="newsletter-form" id="newsletter-form">
+            <input type="email" placeholder="Enter your email address..." class="newsletter-input" required />
+            <button type="submit" class="btn-subscribe">Get My ₹200 Coupon</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <!-- Brand Info -->
+        <div class="footer-brand">
+          <a href="#" class="brand-logo" style="color: white; margin-bottom: 16px;">
+            <div class="logo-badge" style="transform: none;">
+              <i class="fa-solid fa-shapes"></i>
+            </div>
+            <div class="logo-text">
+              <span style="color: white; -webkit-text-fill-color: white;">MC TOYS</span>
+              <span class="logo-sub" style="color: #94A3B8; -webkit-text-fill-color: #94A3B8;">Where Every Toy Brings a Smile!</span>
+            </div>
+          </a>
+          <p class="footer-about">
+            India's most loved destination for premium, certified-safe, and imaginative toys for toddlers to teenagers. We believe playtime shapes future minds.
+          </p>
+          <div class="footer-socials">
+            <a href="#" class="social-btn" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="social-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="social-btn" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            <a href="#" class="social-btn" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#best-sellers-section">Shop Catalog</a></li>
+            <li><a href="#new-arrivals-section">New Arrivals</a></li>
+            <li><a href="#categories-section">Toy Categories</a></li>
+            <li><a href="#age-section">Shop By Age</a></li>
+            <li><a href="#collections-section">Special Offers</a></li>
+          </ul>
+        </div>
+
+        <!-- Customer Care -->
+        <div>
+          <h4 class="footer-col-title">Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="#">Track Your Order</a></li>
+            <li><a href="#">Shipping Policy</a></li>
+            <li><a href="#">Return & Refund Policy</a></li>
+            <li><a href="#">Safety Standards</a></li>
+            <li><a href="#">FAQ & Helpdesk</a></li>
+            <li><a href="#">Gift Cards</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact Details -->
+        <div>
+          <h4 class="footer-col-title">Contact MC TOYS</h4>
+          <div class="footer-contact-item">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>MC Toys Park, 4th Block, Koramangala, Bengaluru, Karnataka 560034</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fa-solid fa-phone"></i>
+            <span>+91 1800-MCTOYS (Toll Free)</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fa-solid fa-envelope"></i>
+            <span>care@mctoys.com</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fa-solid fa-clock"></i>
+            <span>Mon - Sat: 9:00 AM - 9:00 PM</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <div>
+          © 2026 <strong>MC TOYS</strong>. All rights reserved. “Where Every Toy Brings a Smile!”
+        </div>
+        <div class="payment-badges">
+          <i class="fa-brands fa-cc-visa" title="Visa"></i>
+          <i class="fa-brands fa-cc-mastercard" title="Mastercard"></i>
+          <i class="fa-solid fa-credit-card" title="UPI & Cards"></i>
+          <i class="fa-solid fa-shield-heart" title="100% Safe Checkout"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= DRAWERS & MODALS ================= -->
+
+  <!-- Drawer Backdrop -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeAllDrawers()"></div>
+
+  <!-- Shopping Cart Slide-in Drawer -->
+  <aside class="side-drawer" id="cart-drawer">
+    <div class="drawer-header">
+      <h3 class="drawer-title"><i class="fa-solid fa-basket-shopping" style="color: #FF477E;"></i> My Toy Cart</h3>
+      <button class="btn-close-drawer" onclick="toggleCartDrawer(false)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Free shipping meter -->
+    <div class="shipping-meter-wrap">
+      <div class="shipping-msg" id="free-shipping-msg">
+        <i class="fa-solid fa-truck-fast"></i> Add items worth ₹999 for FREE Delivery!
+      </div>
+      <div class="shipping-progress-bar">
+        <div class="shipping-fill" id="free-shipping-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Cart items body -->
+    <div class="drawer-body" id="cart-items-container">
+      <!-- Injected by app.js -->
+    </div>
+
+    <div class="drawer-footer">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">₹0</span>
+      </div>
+      <div class="summary-row">
+        <span>Estimated Delivery</span>
+        <span style="color: #059669; font-weight: 700;">FREE</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total Amount</span>
+        <span class="total-amount" id="cart-total-amount">₹0</span>
+      </div>
+      <button class="btn-checkout" onclick="triggerCheckout()">
+        <i class="fa-solid fa-lock"></i> Secure Checkout Now
+      </button>
+    </div>
+  </aside>
+
+  <!-- Wishlist Slide-in Drawer -->
+  <aside class="side-drawer" id="wishlist-drawer">
+    <div class="drawer-header">
+      <h3 class="drawer-title"><i class="fa-solid fa-heart" style="color: #FF477E;"></i> Saved Wishlist</h3>
+      <button class="btn-close-drawer" onclick="toggleWishlistDrawer(false)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="drawer-body" id="wishlist-items-container">
+      <!-- Injected by app.js -->
+    </div>
+  </aside>
+
+  <!-- Quick View Modal -->
+  <div class="modal-overlay" id="quickview-modal">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeQuickView()"><i class="fa-solid fa-xmark"></i></button>
+      <div id="quickview-body">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div class="modal-overlay" id="search-modal">
+    <div class="modal-content search-modal-content">
+      <button class="modal-close-btn" onclick="closeSearchModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="margin-bottom: 16px; font-size: 1.4rem;">Search MC TOYS</h3>
+      <div class="search-input-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search by toy name, category, or age..." 
+          oninput="handleSearchInput(event)" 
+        />
+      </div>
+      <div class="search-results-list" id="search-results-list">
+        <!-- Search results injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Celebration Modal -->
+  <div class="modal-overlay" id="checkout-success-modal">
+    <div class="modal-content" style="max-width: 520px; text-align: center; padding: 40px 30px;">
+      <button class="modal-close-btn" onclick="closeCheckoutSuccess()"><i class="fa-solid fa-xmark"></i></button>
+      <div style="font-size: 4rem; margin-bottom: 12px;">🎉🧸🚀</div>
+      <h2 style="font-size: 2rem; color: #1E293B; margin-bottom: 10px;">Order Placed Successfully!</h2>
+      <div id="checkout-success-summary">
+        <!-- Injected dynamically -->
+      </div>
+      <button class="btn btn-primary" style="margin-top: 24px; width: 100%;" onclick="closeCheckoutSuccess()">
+        Continue Shopping More Toys
+      </button>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="admin-login-modal">
+    <div class="modal-content" style="max-width: 420px; padding: 36px 30px; text-align: center;">
+      <button class="modal-close-btn" onclick="closeAdminLogin()"><i class="fa-solid fa-xmark"></i></button>
+      <div style="width: 60px; height: 60px; border-radius: 50%; background: #FFE8EC; color: #FF477E; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 16px;">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h3 style="font-size: 1.5rem; margin-bottom: 6px;">Admin Sign In</h3>
+      <p style="color: #64748B; font-size: 0.88rem; margin-bottom: 24px;">Enter your admin credentials to manage MC TOYS products & prices.</p>
+      
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div style="margin-bottom: 16px; text-align: left;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">Admin ID</label>
+          <input type="text" id="admin-user-input" placeholder="e.g. admin01" required 
+                 style="width: 100%; padding: 12px 16px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-family: inherit; font-size: 0.95rem; outline: none;" />
+        </div>
+        <div style="margin-bottom: 20px; text-align: left;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">Password</label>
+          <input type="password" id="admin-pass-input" placeholder="••••••••" required 
+                 style="width: 100%; padding: 12px 16px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-family: inherit; font-size: 0.95rem; outline: none;" />
+        </div>
+        <div id="admin-login-error" style="color: #EF4444; font-size: 0.85rem; margin-bottom: 14px; display: none; font-weight: 600;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Invalid ID or Password!
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Dashboard
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Modal -->
+  <div class="modal-overlay" id="admin-dashboard-modal">
+    <div class="modal-content" style="max-width: 1050px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="padding: 24px 30px; border-bottom: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #FF477E, #FB8500); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            <i class="fa-solid fa-gauge-high"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 2px;">MC TOYS Admin Control Center</h3>
+            <span style="font-size: 0.8rem; color: #10B981; font-weight: 700;"><i class="fa-solid fa-circle" style="font-size: 0.6rem;"></i> Logged in as: admin01</span>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="btn btn-primary" style="padding: 8px 18px; font-size: 0.88rem;" onclick="openAddProductModal()">
+            <i class="fa-solid fa-plus"></i> Add New Product
+          </button>
+          <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.88rem; color: #EF4444; border-color: #FCA5A5;" onclick="adminLogout()">
+            <i class="fa-solid fa-power-off"></i> Logout
+          </button>
+          <button class="modal-close-btn" style="position: static;" onclick="closeAdminDashboard()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Admin Product Management Table Area -->
+      <div style="padding: 24px 30px; overflow-y: auto; flex-grow: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <h4 style="font-size: 1.15rem;">Manage Inventory & Pricing (<span id="admin-total-products">0</span> Toys)</h4>
+          <input type="text" id="admin-filter-search" placeholder="Search catalog toys..." oninput="renderAdminProductTable()"
+                 style="padding: 8px 16px; border: 1.5px solid #E2E8F0; border-radius: 20px; font-size: 0.88rem; outline: none; width: 260px;" />
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid #EEF2F6; border-radius: 16px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+              <tr style="background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; color: #475569;">
+                <th style="padding: 12px 16px;">Toy</th>
+                <th style="padding: 12px 16px;">Category</th>
+                <th style="padding: 12px 16px;">Age</th>
+                <th style="padding: 12px 16px;">Price (₹)</th>
+                <th style="padding: 12px 16px;">Orig. Price (₹)</th>
+                <th style="padding: 12px 16px; text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-product-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Product Modal -->
+  <div class="modal-overlay" id="product-form-modal">
+    <div class="modal-content" style="max-width: 580px; padding: 30px;">
+      <button class="modal-close-btn" onclick="closeProductFormModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="font-size: 1.4rem; margin-bottom: 6px;" id="product-form-title">Add New Toy Product</h3>
+      <p style="color: #64748B; font-size: 0.85rem; margin-bottom: 20px;">Fill out the details below to add or edit product catalog information.</p>
+
+      <form id="product-manage-form" onsubmit="handleSaveProduct(event)">
+        <input type="hidden" id="form-product-id" value="" />
+        
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Product Name *</label>
+          <input type="text" id="form-product-name" required placeholder="e.g. Turbo Supercharged Stunt Car"
+                 style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none;" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Selling Price (₹) *</label>
+            <input type="number" id="form-product-price" required min="1" placeholder="e.g. 1299"
+                   style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Original Price (₹) *</label>
+            <input type="number" id="form-product-origprice" required min="1" placeholder="e.g. 1999"
+                   style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Category *</label>
+            <select id="form-product-category" required
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none; background: white;">
+              <option value="soft-toys">Soft Toys</option>
+              <option value="rc-toys">Remote Control Toys</option>
+              <option value="puzzles">Puzzles & Games</option>
+              <option value="building-blocks">Building Blocks</option>
+              <option value="arts-crafts">Arts & Crafts</option>
+              <option value="dolls">Dolls & Doll Houses</option>
+              <option value="educational">Educational Toys</option>
+              <option value="outdoor">Outdoor Toys</option>
+              <option value="kids-games">Kids Games</option>
+              <option value="action-figures">Action Figures</option>
+              <option value="baby-toys">Baby Toys</option>
+              <option value="gifts">Gifts & Hampers</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Age Recommendation *</label>
+            <select id="form-product-age" required
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none; background: white;">
+              <option value="0-2">0–2 Years</option>
+              <option value="3-5">3–5 Years</option>
+              <option value="6-8">6–8 Years</option>
+              <option value="9-12">9–12 Years</option>
+              <option value="13+">13+ Years</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Image URL</label>
+          <input type="url" id="form-product-image" placeholder="https://images.unsplash.com/photo-..."
+                 style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none;" />
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Description</label>
+          <textarea id="form-product-desc" rows="3" placeholder="Exciting details about this toy..."
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 0.92rem; outline: none; resize: vertical;"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="closeProductFormModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
