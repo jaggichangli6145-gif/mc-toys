@@ -1386,8 +1386,12 @@ function selectPaymentMethod(method) {
 async function handleCheckoutSubmit(e) {
   e.preventDefault();
 
-  if (!otpState.isVerified || !otpState.verifiedToken) {
-    showToast('Please verify your Indian mobile number before placing the order.', 'error', 'fa-shield-halved');
+  const phoneEl = document.getElementById('cust-phone');
+  const phone = phoneEl ? phoneEl.value.trim() : '';
+
+  if (!phone || phone.length < 10) {
+    showToast('Please enter a valid 10-digit mobile number.', 'error', 'fa-phone');
+    if (phoneEl) phoneEl.focus();
     return;
   }
 
@@ -1407,8 +1411,7 @@ async function handleCheckoutSubmit(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        mobile: otpState.mobile,
-        verifiedToken: otpState.verifiedToken,
+        mobile: phone,
         customerName: name,
         address: `${address}, PIN: ${pincode}`,
         items: state.cart,

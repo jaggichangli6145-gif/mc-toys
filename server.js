@@ -160,18 +160,18 @@ app.post('/api/orders/place', (req, res) => {
   try {
     const { mobile, verifiedToken, items, total, customerName, address, paymentMethod } = req.body;
 
-    if (!mobile || !verifiedToken) {
+    if (!mobile) {
       return res.status(400).json({
         success: false,
-        error: 'Phone number verification is required before placing an order.'
+        error: 'Mobile number is required to place an order.'
       });
     }
 
     const validation = otpManager.normalizeAndValidateMobile(mobile);
-    if (!validation.valid || !otpManager.isVerified(validation.mobile, verifiedToken)) {
-      return res.status(403).json({
+    if (!validation.valid) {
+      return res.status(400).json({
         success: false,
-        error: 'Phone verification expired or invalid. Please verify your mobile number again.'
+        error: validation.error
       });
     }
 
