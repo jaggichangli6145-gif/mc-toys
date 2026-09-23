@@ -1,7 +1,7 @@
 {
   "name": "toyland-store",
   "version": "1.0.0",
-  "description": "MC TOYS Toyland Store with Phone Number OTP verification system and MSG91 ready architecture",
+  "description": "DEMO STORE with Phone Number OTP verification system and MSG91 ready architecture",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
