@@ -1384,10 +1384,35 @@ function selectPaymentMethod(method) {
 }
 
 async function handleCheckoutSubmit(e) {
-  e.preventDefault();
+  if (e && e.preventDefault) e.preventDefault();
 
+  const nameEl = document.getElementById('cust-name');
+  const addressEl = document.getElementById('cust-address');
+  const pincodeEl = document.getElementById('cust-pincode');
   const phoneEl = document.getElementById('cust-phone');
-  const phone = phoneEl ? phoneEl.value.trim() : '';
+
+  const name = nameEl ? nameEl.value.trim() : '';
+  const address = addressEl ? addressEl.value.trim() : '';
+  const pincode = pincodeEl ? pincodeEl.value.trim() : '';
+  const phone = phoneEl ? phoneEl.value.trim().replace(/\D/g, '') : '';
+
+  if (!name) {
+    showToast('Please enter customer name.', 'error', 'fa-user');
+    if (nameEl) nameEl.focus();
+    return;
+  }
+
+  if (!pincode || pincode.length < 6) {
+    showToast('Please enter a valid 6-digit delivery PIN code.', 'error', 'fa-location-dot');
+    if (pincodeEl) pincodeEl.focus();
+    return;
+  }
+
+  if (!address) {
+    showToast('Please enter delivery address.', 'error', 'fa-house');
+    if (addressEl) addressEl.focus();
+    return;
+  }
 
   if (!phone || phone.length < 10) {
     showToast('Please enter a valid 10-digit mobile number.', 'error', 'fa-phone');
@@ -1395,9 +1420,6 @@ async function handleCheckoutSubmit(e) {
     return;
   }
 
-  const name = document.getElementById('cust-name').value.trim();
-  const address = document.getElementById('cust-address').value.trim();
-  const pincode = document.getElementById('cust-pincode').value.trim();
   const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const orderBtn = document.getElementById('btn-complete-order');

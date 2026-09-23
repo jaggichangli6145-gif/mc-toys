@@ -669,7 +669,7 @@
       </div>
 
       <!-- Checkout Form -->
-      <form id="checkout-form" onsubmit="handleCheckoutSubmit(event)">
+      <form id="checkout-form" novalidate onsubmit="handleCheckoutSubmit(event)">
         <!-- Customer Details -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
           <div>
@@ -763,9 +763,10 @@
 
         <!-- Submit Order Button -->
         <button 
-          type="submit" 
+          type="button" 
           id="btn-complete-order" 
           class="btn-checkout" 
+          onclick="handleCheckoutSubmit(event)"
           style="width: 100%; opacity: 1; cursor: pointer;">
           <i class="fa-solid fa-lock"></i> Place Order Now
         </button>
