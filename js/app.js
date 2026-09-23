@@ -1348,6 +1348,41 @@ function closeCheckoutModal() {
   if (modal) modal.classList.remove('active');
 }
 
+let selectedPaymentMethod = 'UPI';
+
+function selectPaymentMethod(method) {
+  selectedPaymentMethod = method;
+  const upiLabel = document.getElementById('pay-opt-upi');
+  const codLabel = document.getElementById('pay-opt-cod');
+  const upiPreview = document.getElementById('upi-details-preview');
+
+  if (method === 'UPI') {
+    if (upiLabel) {
+      upiLabel.className = 'payment-option-label active';
+      upiLabel.style.borderColor = '#059669';
+      upiLabel.style.background = '#ECFDF5';
+    }
+    if (codLabel) {
+      codLabel.className = 'payment-option-label';
+      codLabel.style.borderColor = '#CBD5E1';
+      codLabel.style.background = '#F8FAFC';
+    }
+    if (upiPreview) upiPreview.style.display = 'block';
+  } else {
+    if (codLabel) {
+      codLabel.className = 'payment-option-label active';
+      codLabel.style.borderColor = '#FF477E';
+      codLabel.style.background = '#FFF1F2';
+    }
+    if (upiLabel) {
+      upiLabel.className = 'payment-option-label';
+      upiLabel.style.borderColor = '#CBD5E1';
+      upiLabel.style.background = '#F8FAFC';
+    }
+    if (upiPreview) upiPreview.style.display = 'none';
+  }
+}
+
 async function handleCheckoutSubmit(e) {
   e.preventDefault();
 
@@ -1377,7 +1412,8 @@ async function handleCheckoutSubmit(e) {
         customerName: name,
         address: `${address}, PIN: ${pincode}`,
         items: state.cart,
-        total: total
+        total: total,
+        paymentMethod: selectedPaymentMethod
       })
     });
 
@@ -1386,25 +1422,107 @@ async function handleCheckoutSubmit(e) {
       throw new Error(data.error || 'Failed to place order.');
     }
 
-    // Order Success!
     closeCheckoutModal();
     launchConfetti();
 
     const checkoutSuccessModal = document.getElementById('checkout-success-modal');
     const summaryEl = document.getElementById('checkout-success-summary');
-    if (summaryEl) {
-      summaryEl.innerHTML = `
-        <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-          <strong style="color: #065F46; font-size: 1rem;"><i class="fa-solid fa-circle-check"></i> ${data.message}</strong>
-          <div style="color: #047857; font-size: 0.84rem; margin-top: 4px;">Order ID: <strong>#${data.orderId}</strong> • Verified: <strong>${data.verifiedPhone}</strong></div>
-        </div>
-        <p style="font-size: 1.1rem; color: #334155; margin-bottom: 8px;">
-          Order Total: <strong style="color: #FF477E;">₹${total.toLocaleString('en-IN')}</strong>
-        </p>
-        <p style="color: #64748B; font-size: 0.88rem;">
-          Thank you, <strong>${name}</strong>! Your toy package will be dispatched to <em>${address}</em>. An SMS notification has been dispatched to <strong>${data.verifiedPhone}</strong>.
-        </p>
-      `;
+    const headingEl = document.getElementById('checkout-success-heading');
+    const iconEl = document.getElementById('checkout-success-icon');
+
+    if (selectedPaymentMethod === 'UPI') {
+      if (iconEl) iconEl.textContent = '📲⚡';
+      if (headingEl) headingEl.textContent = 'Pay ₹' + total.toLocaleString('en-IN') + ' via UPI';
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 16px; margin-bottom: 18px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 10px;">
+              <span style="font-size: 0.85rem; color: #64748B;">Order Reference:</span>
+              <strong style="color: #0F172A; font-size: 0.95rem;">#${data.orderId}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 10px;">
+              <span style="font-size: 0.85rem; color: #64748B;">Payee Name:</span>
+              <strong style="color: #0F172A;">${data.upi.payeeName}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 10px;">
+              <span style="font-size: 0.85rem; color: #64748B;">Payee UPI ID:</span>
+              <span style="font-family: monospace; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px;">${data.upi.vpa}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.85rem; color: #64748B;">Total Payable:</span>
+              <strong style="font-size: 1.25rem; color: #059669;">₹${total.toLocaleString('en-IN')}</strong>
+            </div>
+          </div>
+
+          <!-- Dynamic QR Code Card -->
+          <div style="background: #FFFFFF; border: 2px dashed #CBD5E1; border-radius: 16px; padding: 20px; display: inline-block; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <div id="upi-qrcode-container" style="display: flex; justify-content: center; margin: 0 auto 12px;"></div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: #475569;">
+              <i class="fa-solid fa-camera"></i> Scan with any UPI App (GPay, PhonePe, Paytm)
+            </div>
+          </div>
+
+          <!-- Mobile App Direct Deep Link Button -->
+          <div style="margin-bottom: 18px;">
+            <a href="${data.upi.upiUrl}" class="btn btn-primary" style="display: block; width: 100%; text-decoration: none; padding: 12px; font-size: 0.95rem; background: linear-gradient(135deg, #059669, #10B981); border: none; border-radius: 10px; color: white; font-weight: 700;">
+              <i class="fa-solid fa-mobile-screen"></i> Click to Pay via UPI App (Mobile)
+            </a>
+          </div>
+
+          <!-- Verification Flow & UTR Submission Box -->
+          <div style="background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 14px; padding: 16px; text-align: left; margin-bottom: 16px;">
+            <div style="font-weight: 800; color: #92400E; font-size: 0.9rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-hourglass-half"></i> Payment Status: <span style="background: #FEF3C7; padding: 2px 8px; border-radius: 6px;">Pending Verification</span>
+            </div>
+            <p style="font-size: 0.78rem; color: #B45309; margin-bottom: 12px; line-height: 1.5;">
+              Payment complete hone ke baad bank se aane wala <strong>12-digit UPI Reference / UTR Number</strong> neeche enter karein. Hamari admin team payment check karke order confirm karegi.
+            </p>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="order-utr-input" maxlength="20" placeholder="12-digit UPI Ref / UTR No." 
+                     style="flex-grow: 1; padding: 9px 12px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-family: monospace; font-size: 0.9rem; outline: none;" />
+              <button type="button" class="btn btn-secondary" onclick="submitOrderUtr('${data.orderId}')" style="padding: 9px 16px; font-size: 0.82rem; font-weight: 700; white-space: nowrap;">
+                Submit UTR
+              </button>
+            </div>
+            <div id="utr-feedback-msg" style="font-size: 0.78rem; margin-top: 8px; display: none; font-weight: 600;"></div>
+          </div>
+        `;
+
+        // Render QR Code using QRCode.js
+        setTimeout(() => {
+          const qrContainer = document.getElementById('upi-qrcode-container');
+          if (qrContainer && typeof QRCode !== 'undefined') {
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+              text: data.upi.upiUrl,
+              width: 160,
+              height: 160,
+              colorDark: '#000000',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          }
+        }, 100);
+      }
+    } else {
+      // Cash on Delivery Summary
+      if (iconEl) iconEl.textContent = '🎉📦';
+      if (headingEl) headingEl.textContent = 'Order Placed (Cash on Delivery)!';
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+            <strong style="color: #065F46; font-size: 1rem;"><i class="fa-solid fa-circle-check"></i> Order Confirmed</strong>
+            <div style="color: #047857; font-size: 0.84rem; margin-top: 4px;">Order ID: <strong>#${data.orderId}</strong> • Verified Phone: <strong>${data.verifiedPhone}</strong></div>
+          </div>
+          <p style="font-size: 1.1rem; color: #334155; margin-bottom: 8px;">
+            Payable at Doorstep: <strong style="color: #FF477E;">₹${total.toLocaleString('en-IN')}</strong>
+          </p>
+          <p style="color: #64748B; font-size: 0.88rem;">
+            Thank you, <strong>${name}</strong>! Your toy package will be dispatched to <em>${address}</em>. Please keep cash ready at delivery.
+          </p>
+        `;
+      }
     }
 
     if (checkoutSuccessModal) checkoutSuccessModal.classList.add('active');
@@ -1433,25 +1551,176 @@ async function handleCheckoutSubmit(e) {
   }
 }
 
+async function submitOrderUtr(orderId) {
+  const input = document.getElementById('order-utr-input');
+  const msgEl = document.getElementById('utr-feedback-msg');
+  const utr = input ? input.value.trim() : '';
+
+  if (!utr || utr.length < 6) {
+    if (msgEl) {
+      msgEl.style.display = 'block';
+      msgEl.style.color = '#DC2626';
+      msgEl.textContent = 'Please enter a valid 12-digit UPI UTR number from your payment app.';
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/orders/submit-utr', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, utrNumber: utr })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error);
+
+    if (msgEl) {
+      msgEl.style.display = 'block';
+      msgEl.style.color = '#059669';
+      msgEl.innerHTML = '<i class="fa-solid fa-check"></i> UTR submitted! Payment status updated to Pending Verification.';
+    }
+    showToast('UPI Reference submitted successfully', 'success', 'fa-receipt');
+  } catch (e) {
+    if (msgEl) {
+      msgEl.style.display = 'block';
+      msgEl.style.color = '#DC2626';
+      msgEl.textContent = e.message;
+    }
+  }
+}
+
 // ----------------- ADMIN DASHBOARD TABS & SMS SETTINGS -----------------
 function switchAdminTab(tab) {
   const invTab = document.getElementById('admin-tab-inventory');
   const smsTab = document.getElementById('admin-tab-sms');
+  const ordersTab = document.getElementById('admin-tab-orders');
+
   const invView = document.getElementById('admin-view-inventory');
   const smsView = document.getElementById('admin-view-sms');
+  const ordersView = document.getElementById('admin-view-orders');
+
+  [invTab, smsTab, ordersTab].forEach(t => { if (t) t.classList.remove('active'); });
+  [invView, smsView, ordersView].forEach(v => { if (v) v.style.display = 'none'; });
 
   if (tab === 'sms') {
-    if (invTab) invTab.classList.remove('active');
     if (smsTab) smsTab.classList.add('active');
-    if (invView) invView.style.display = 'none';
     if (smsView) smsView.style.display = 'block';
     fetchAdminSmsConfig();
+  } else if (tab === 'orders') {
+    if (ordersTab) ordersTab.classList.add('active');
+    if (ordersView) ordersView.style.display = 'block';
+    fetchAdminOrders();
   } else {
-    if (smsTab) smsTab.classList.remove('active');
     if (invTab) invTab.classList.add('active');
-    if (smsView) smsView.style.display = 'none';
     if (invView) invView.style.display = 'block';
     renderAdminProductTable();
+  }
+}
+
+async function fetchAdminOrders() {
+  const tbody = document.getElementById('admin-orders-tbody');
+  const badge = document.getElementById('admin-pending-badge');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('/api/admin/orders');
+    const data = await res.json();
+    if (!res.ok || !data.success) return;
+
+    const orders = data.orders || [];
+    const pendingCount = orders.filter(o => o.paymentStatus === 'Pending Verification').length;
+
+    if (badge) {
+      if (pendingCount > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = pendingCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: #64748B;">No customer orders placed yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => {
+      const isPaid = o.paymentStatus === 'Paid';
+      const isRejected = o.paymentStatus === 'Rejected';
+      const isPending = o.paymentStatus === 'Pending Verification';
+
+      let statusBadge = '';
+      if (isPaid) {
+        statusBadge = `<span style="background: #D1FAE5; color: #065F46; padding: 4px 10px; border-radius: 99px; font-weight: 700; font-size: 0.76rem;"><i class="fa-solid fa-circle-check"></i> Paid (Verified)</span>`;
+      } else if (isRejected) {
+        statusBadge = `<span style="background: #FEE2E2; color: #991B1B; padding: 4px 10px; border-radius: 99px; font-weight: 700; font-size: 0.76rem;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`;
+      } else {
+        statusBadge = `<span style="background: #FEF3C7; color: #92400E; padding: 4px 10px; border-radius: 99px; font-weight: 700; font-size: 0.76rem;"><i class="fa-solid fa-clock"></i> ${o.paymentStatus}</span>`;
+      }
+
+      const dateStr = new Date(o.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+
+      return `
+        <tr style="border-bottom: 1px solid #EEF2F6;">
+          <td style="padding: 12px 14px;">
+            <strong style="color: #0F172A;">#${o.orderId}</strong>
+            <div style="font-size: 0.75rem; color: #64748B;">${dateStr}</div>
+          </td>
+          <td style="padding: 12px 14px;">
+            <div style="font-weight: 700; color: #1E293B;">${o.customerName || 'Customer'}</div>
+            <div style="font-size: 0.78rem; color: #059669; font-weight: 600;">+91 ${o.mobile}</div>
+          </td>
+          <td style="padding: 12px 14px; font-weight: 800; color: #FF477E;">₹${o.total.toLocaleString('en-IN')}</td>
+          <td style="padding: 12px 14px;">
+            <span style="background: ${o.paymentMethod === 'UPI' ? '#EDE9FE' : '#F1F5F9'}; color: ${o.paymentMethod === 'UPI' ? '#6B21A8' : '#475569'}; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+              ${o.paymentMethod}
+            </span>
+          </td>
+          <td style="padding: 12px 14px;">
+            ${o.utrNumber ? `<code style="background: #F1F5F9; padding: 3px 6px; border-radius: 4px; font-weight: 700; color: #1E293B;">${o.utrNumber}</code>` : `<span style="color: #94A3B8; font-style: italic;">No UTR yet</span>`}
+          </td>
+          <td style="padding: 12px 14px; text-align: center;">
+            ${statusBadge}
+          </td>
+          <td style="padding: 12px 14px; text-align: center;">
+            <div style="display: flex; gap: 6px; justify-content: center;">
+              ${!isPaid ? `
+                <button class="btn btn-primary" onclick="verifyAdminOrder('${o.orderId}', 'Paid')" style="padding: 5px 10px; font-size: 0.76rem; background: #059669; border-color: #059669;" title="Confirm Received in Bank">
+                  <i class="fa-solid fa-check"></i> Verify
+                </button>
+              ` : ''}
+              ${!isRejected ? `
+                <button class="btn btn-secondary" onclick="verifyAdminOrder('${o.orderId}', 'Rejected')" style="padding: 5px 10px; font-size: 0.76rem; color: #EF4444; border-color: #FCA5A5;" title="Reject Payment">
+                  <i class="fa-solid fa-xmark"></i> Reject
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch (e) {
+    console.warn('Failed to fetch admin orders:', e);
+  }
+}
+
+async function verifyAdminOrder(orderId, status) {
+  if (!confirm(`Are you sure you want to mark order #${orderId} as ${status}?`)) return;
+
+  try {
+    const res = await fetch('/api/admin/orders/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, status })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error);
+
+    showToast(`Order #${orderId} marked as ${status}`, status === 'Paid' ? 'success' : 'info', 'fa-receipt');
+    fetchAdminOrders();
+  } catch (e) {
+    showToast(e.message, 'error', 'fa-triangle-exclamation');
   }
 }
 
